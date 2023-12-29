@@ -1,12 +1,25 @@
 require("dotenv").config();
+const multer = require("multer");
+const path = require("path");
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const connection = require("./db");
 const Tip = require("./models/TipModel");
 const axios = require("axios");
+const multerS3 = require("multer-s3");
+const { S3 } = require("@aws-sdk/client-s3");
 
-const RECAPTCHA_SECRET_KEY = "6LcpSj8pAAAAABZ0nmLbhNxDM1hQ0nXKo7YI80xR";
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+
+const s3 = new S3({
+	credentials: {
+		accessKeyId: process.env.S3_ACCESS_KEY,
+		secretAccessKey: process.env.S3_SECRET_KEY
+	},
+
+	region: process.env.S3_REGION
+});
 
 // database connection
 connection();
@@ -14,7 +27,18 @@ connection();
 app.use(express.json());
 app.use(cors());
 
-app.post("/submit-tip", async (req, res) => {
+const upload = multer({
+	storage: multerS3({
+		s3: s3,
+		bucket: "drugfreetamil",
+		key: (req, file, cb) => {
+			const fileName = `${Date.now()}_${file.originalname}`;
+			cb(null, `files/${fileName}`);
+		}
+	})
+});
+
+app.post("/submit-tip", upload.single("file"), async (req, res) => {
 	const {
 		name,
 		email,
@@ -24,12 +48,11 @@ app.post("/submit-tip", async (req, res) => {
 		landmark,
 		yourMessage,
 		captchaValue,
-		fileLink,
 		position
 	} = req.body;
 
-	// console.log(req.body);
-	// return;
+	const fileLink = req.file.location;
+
 	if (!captchaValue) {
 		return res
 			.status(400)
