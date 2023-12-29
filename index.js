@@ -38,7 +38,7 @@ const upload = multer({
 	})
 });
 
-app.post("/submit-tip", upload.single("file"), async (req, res) => {
+app.post("/api/submit-tip", upload.single("file"), async (req, res) => {
 	const {
 		name,
 		email,
