@@ -87,6 +87,7 @@ app.post("/api/submit-tip", upload.single("file"), async (req, res) => {
 				position,
 				status
 			});
+			console.log(newTip);
 
 			try {
 				await newTip.save();
