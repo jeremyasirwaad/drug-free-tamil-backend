@@ -12,6 +12,7 @@ const tipSchema = new mongoose.Schema({
 	captchaValue: String,
 	fileLink: String,
 	ref_no: Number,
+	status: Number,
 	position: {
 		lat: Number,
 		lng: Number

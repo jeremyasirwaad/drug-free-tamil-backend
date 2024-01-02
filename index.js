@@ -48,7 +48,8 @@ app.post("/api/submit-tip", upload.single("file"), async (req, res) => {
 		landmark,
 		yourMessage,
 		captchaValue,
-		position
+		lat,
+		lng
 	} = req.body;
 
 	const fileLink = req.file.location;
@@ -66,8 +67,13 @@ app.post("/api/submit-tip", upload.single("file"), async (req, res) => {
 
 		if (response.data.success) {
 			const count = await Tip.countDocuments({});
-			const seed = 100000;
 			const ref_no = 100000 + count + 1;
+			const position = {
+				lat: lat,
+				lng: lng
+			};
+			const status = 0;
+
 			const newTip = new Tip({
 				name,
 				email,
@@ -77,8 +83,9 @@ app.post("/api/submit-tip", upload.single("file"), async (req, res) => {
 				landmark,
 				yourMessage,
 				fileLink,
+				ref_no,
 				position,
-				ref_no
+				status
 			});
 
 			try {
